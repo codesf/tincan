@@ -4,6 +4,7 @@ import web
 from apps.api import v1
 
 urls = ("/sandbox/?", "apps.api.v1.Sandbox",
+        "/twiml/directions/(.*)/(.*)/?", "apps.api.v1.TwimlDirections",
         "/directions/(.*)/(.*)/?", "apps.api.v1.Directions",
         "/tincan/sms/?", "apps.api.v1.TincanSMS",
         "/tincan/voice/?", "apps.api.v1.TincanVoice",

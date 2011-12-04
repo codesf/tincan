@@ -59,9 +59,9 @@ class TincanEntry:
     
 class TincanSMS:
     def GET(self):
-        #account = pc.webapis['twilio']['account_sid']
-        #token = pc.webapis['twilio']['auth_token']
-        #client = TwilioRestClient(account, token)
+        account = pc.webapis['twilio']['account_sid']
+        token = pc.webapis['twilio']['auth_token']
+        client = TwilioRestClient(account, token)
 
         # Create our twilio xml object (initialize it as a response)
         resp = twiml.Response()
@@ -81,40 +81,29 @@ class TincanSMS:
 
         elif len(bow) and bow[0] == "E":
             result = self.exec_hydrant(bow)
-            print result
-            resp.sms(result)
+            url = 'https://www.google.com/fusiontables/api/query?sql=SELECT * FROM '
+            headers= {'Content-Type': 'application/x-www-form-urlencoded'}
+            data = urllib2.urlopen(url).read()
+            results = json.loads(data)
+            return results
 
         elif len(bow) and bow[0] == "M":
             body = body[2:] # remove the "M " in the request            
-            directions = self.exec_directions(body)
-            #resp.sms("yo dawg, heard you like directions")
-            resp.sms(directions[:SMS_MAX_LEN - 5])
+            src, dest = body.split(" to ")
+            path = urllib.quote("/api/v1/twiml/directions/%s/%s" % (src, dest))
+            print TwimlDirections().GET(src, dest)
+            call = client.calls.create(to="16033056953",
+                                       from_="14155992671",
+                                       url="http://www.codesf.org:8080" + path)
+            return call.sid
+            #directions = self.exec_directions(body)
+            #resp.say(directions)
+            #resp.sms(directions[:SMS_MAX_LEN - 5])
             #for result in chunk(directions, SMS_MAX_LEN):
             #    print result
             #    resp.sms(result)
 
-        elif len(bow) and bow[0] == "X":
-            resp.sms("x gunna give it to ya")
-
-        web.header('Content-Type', 'text/xml')
         return str(resp)
-
-    def exec_directions(self, body):
-        src, dest = body.split(" to ")
-        path = urllib.quote("/api/v1/directions/%s/%s" % (src, dest))
-        url = SERVER + path
-        data = urllib2.urlopen(url).read()
-        directions = json.loads(data)
-        
-        unsent = ''
-            
-        for direction in directions:
-            instruction = strip_tags(direction['html_instructions'])
-            dist = direction['duration']['value']
-            duration = direction['duration']['text']
-            unsent += '%s ' % instruction#, dist, duration
-            
-        return unsent
                     
     def exec_weather(self, bow, msg_zipcode):
         """
@@ -128,7 +117,7 @@ class TincanSMS:
     
     def exec_hydrant(self, bow):
         """ Hyndrant port """
-        url = 'https://www.google.com/fusiontables/api/query?sql=SELECT * FROM 2331654'
+        url = 'https://www.google.com/fusiontables/api/query?sql=SELECT * FROM S332004hUlz'
         headers= {'Content-Type': 'application/x-www-form-urlencoded'}
         data = urllib2.urlopen(url).read()
         results = json.loads(data)
@@ -144,6 +133,45 @@ def chunk(lst, n):
     for i in xrange(0, len(lst), n):
         chunks.append(lst[i:i+n])
     return chunks
+
+class TwimlDirections:
+    def GET(self, src=None, dest=None):
+        path = urllib.quote("/api/v1/directions/%s/%s" % (src, dest))
+        url = SERVER + path
+        data = urllib2.urlopen(url).read()
+        directions = json.loads(data)
+        
+        unsent = ''
+            
+        for direction in directions:
+            instruction = strip_tags(direction['html_instructions'])
+            dist = direction['duration']['value']
+            duration = direction['duration']['text']
+            unsent += '%s ' % instruction#, dist, duration
+
+        resp = twiml.Response()
+        resp.say(unsent)
+        web.header('Content-Type', 'text/xml')
+        return str(resp)
+
+    def POST(self, src=None, dest=None):
+        path = urllib.quote("/api/v1/directions/%s/%s" % (src, dest))
+        url = SERVER + path
+        data = urllib2.urlopen(url).read()
+        directions = json.loads(data)
+        
+        unsent = ''
+            
+        for direction in directions:
+            instruction = strip_tags(direction['html_instructions'])
+            dist = direction['duration']['value']
+            duration = direction['duration']['text']
+            unsent += '%s ' % instruction#, dist, duration
+
+        resp = twiml.Response()
+        resp.say(unsent)
+        web.header('Content-Type', 'text/xml')
+        return str(resp)
 
 class TincanVoice:
     def GET(self):
