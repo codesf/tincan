@@ -5,7 +5,6 @@ import urllib, urllib2
 import httplib
 import json
 from config import private_conf as pc
-import tropo
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 
@@ -49,6 +48,8 @@ class TincanEntry:
 
 class TincanSMS:
     def GET(self):
+        i = web.input()
+        return i
         web.header('Content-Type', 'text/xml')
         resp = twiml.Response()
         resp.sms("Please enter your current location:")
