@@ -39,7 +39,7 @@ class Directions:
             url = "https://maps.googleapis.com/maps/api/directions/json?origin=%s&destination=%s&mode=walking&sensor=false" % (src, dest)
             data = urllib2.urlopen(url).read()            
             jdata = json.loads(data)
-            return slender.directions(jdata['routes'][0]['legs'][0])                
+            return slender.directions(jdata['routes'][0]['legs'][0]['steps'])
         return "i gets get and post, fo real!"
 
 class TincanSMS:
@@ -86,7 +86,7 @@ class REST:
         conn = httplib.HTTPConnection(url)
         response = conn.request("POST", path, params, headers)
         data = response.read()
-        print(data)
+        #print(data)
         conn.close()
         return data
 

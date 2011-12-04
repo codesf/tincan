@@ -1,0 +1,7 @@
+$def with(directions)
+
+<div style="border: 1px solid #ddd; background-color: #f6f6f6;">
+  $for direction in directions:
+    <p>$:direction['html_instructions'] ($:direction['duration']['value'] ft ~ $:direction['duration']['text'])</p>
+</div>
+
