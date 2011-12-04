@@ -9,7 +9,6 @@ import tropo
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 
-
 class Api:
     def GET(self):
         """
@@ -41,6 +40,12 @@ class Directions:
             jdata = json.loads(data)
             return slender.directions(jdata['routes'][0]['legs'][0]['steps'])
         return "i gets get and post, fo real!"
+
+class TincanEntry:
+    def GET(self):
+        """ Evan, do yo thang! """
+        i = web.input()
+        return TincanSMS().GET() # you may be able to pass 'i' into TincanSMS + Voice - GET(i)
 
 class TincanSMS:
     def GET(self):
