@@ -4,10 +4,10 @@ import web
 from apps.api import v1
 
 urls = ("/sandbox/?", "apps.api.v1.Sandbox",
+        "/directions/(.*)/(.*)/?", "apps.api.v1.Directions",
         "/tincan/sms/?", "apps.api.v1.TincanSMS",
         "/tincan/voice/?", "apps.api.v1.TincanVoice",
-        "/tincan/?", "apps.api.v1.TincanEntry",
-        "/directions/(.*)/(.*)/?", "apps.api.v1.Directions",
+        "/tincan/?", "apps.api.v1.TincanEntry",        
         "/?", "apps.api.v1.Api",
         "/.*", "Error",)
 
