@@ -5,6 +5,7 @@ import urllib, urllib2
 import httplib
 import json
 from config import private_conf as pc
+import pywapi
 from twilio import twiml
 from twilio.rest import TwilioRestClient
 
@@ -48,11 +49,33 @@ class TincanEntry:
 
 class TincanSMS:
     def GET(self):
-        i = web.input()
-        return i
-        web.header('Content-Type', 'text/xml')
+
+        # Create our twilio xml object (initialize it as a response)
         resp = twiml.Response()
-        resp.sms("Please enter your current location:")
+
+        # Get our SMS msg from user
+        i = web.input()
+        body = getattr(i, 'Body', None)
+        msg_zipcode = getattr(i, 'FromZip', None)
+
+        # bag of words is a list of words
+        bow = body.split(" ")
+        
+        if len(bow) and bow[0] == "W":
+            zipcode = bow[1] if len(bow)>=2 and bow[1] else msg_zipcode
+            forecast = pywapi.get_weather_from_google(zipcode)['current_conditions']
+            f_tmp = forecast['temp_f']
+            condition = forecast['condition']
+            weather = "The weather at %s is %s and %s" % (zipcode, f_tmp, condition)
+
+            # Add weather to our sms
+            print weather
+            resp.sms(weather)
+        
+#        elif len(bow) and bow[0] == "M":
+
+        # return our build sms
+        web.header('Content-Type', 'text/xml')
         return str(resp)
 
 class TincanVoice:
@@ -60,7 +83,6 @@ class TincanVoice:
         account = pc.webapis['twilio']['account_sid']
         token = pc.webapis['twilio']['auth_token']
         client = TwilioRestClient(account, token)
-
         call = client.calls.create(to="16033056953",
                                    from_="14155992671",
                                    url="http://demo.twilio.com/welcome/voice")
